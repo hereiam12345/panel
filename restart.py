@@ -469,35 +469,37 @@ class AutoRestartBot(commands.Bot):
             await asyncio.sleep(0.5)
         print(f"Restored multireact in {channel_id}")
 
-    async def restore_multistam(self, data):
-        channel_id = data['channel_id']
-        delay = data.get('delay', 2.0)
-        message = data.get('message', '')
-        
-        if not self.token_pool or not message:
+    async def restore_multistream(self, data):
+        statuses = data.get('statuses', [])
+        if not statuses:
             return
         
-        import aiohttp
-        async def stam_worker(token_info, channel_id, alias, msg, delay):
-            token = token_info["token"]
-            headers = {"Authorization": token, "Content-Type": "application/json"}
-            url = f"https://discord.com/api/v9/channels/{channel_id}/messages"
-            async with aiohttp.ClientSession() as session:
-                counter = 1
-                while True:
-                    msg_with_count = f"{msg} ({counter})"
-                    payload = {"content": msg_with_count}
-                    async with session.post(url, json=payload, headers=headers) as resp:
-                        pass
-                    counter += 1
-                    await asyncio.sleep(delay)
+        token = TOKEN
+        if not token:
+            print("No token available for multistream restore")
+            return
         
-        for token_info in self.token_pool:
-            alias = token_info.get("alias", "unknown")
-            task = asyncio.create_task(stam_worker(token_info, channel_id, alias, message, delay))
-            self.multistam_tasks[alias] = task
+        async def stream_worker(stream_name):
+            try:
+                bot = commands.Bot(command_prefix="!", self_bot=True)
+                @bot.event
+                async def on_ready():
+                    await bot.change_presence(activity=discord.Streaming(name=stream_name, url="https://twitch.tv/yourchannel"))
+                await bot.start(token)
+            except Exception as e:
+                print(f"MultiStream error: {e}")
+        
+        # Cancel existing tasks
+        for task in self.multistream_tasks:
+            if not task.done():
+                task.cancel()
+        self.multistream_tasks.clear()
+        
+        for name in statuses:
+            task = asyncio.create_task(stream_worker(name))
+            self.multistream_tasks.append(task)
             await asyncio.sleep(0.5)
-        print(f"Restored multistam in {channel_id}")
+        print(f"Restored multistream with {len(statuses)} streams")
 
     async def restore_multicount(self, data):
         channel_id = data['channel_id']
