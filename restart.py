@@ -8,6 +8,7 @@ import json
 import os
 import time
 import random
+import aiohttp
 from datetime import datetime
 
 # ========== CONFIGURATION ==========
@@ -50,6 +51,7 @@ class AutoRestartBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", self_bot=True)
         self.restored_commands = False
+        self.token = os.getenv("TOKEN")
         self.start_time = time.time()
         self.tasks = {}
         self.wordlists = {}
@@ -217,7 +219,6 @@ class AutoRestartBot(commands.Bot):
                 except asyncio.CancelledError:
                     return
         
-        import aiohttp
         for token_info in self.token_pool:
             alias = token_info.get("alias", "unknown")
             task = asyncio.create_task(spam_worker(token_info, channel_id, alias, message))
