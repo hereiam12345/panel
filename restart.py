@@ -592,14 +592,6 @@ if __name__ == "__main__":
         print("No token provided!")
         exit()
     
-    # Load wordlists
-    if os.path.exists('wordlists'):
-        for filename in os.listdir('wordlists'):
-            if filename.endswith('.txt'):
-                name = filename[:-4]
-                with open(f'wordlists/{filename}', 'r') as f:
-                    wordlists[name] = [line.strip() for line in f.readlines() if line.strip()]
-    
     bot = AutoRestartBot()
     try:
         bot.run(TOKEN)
