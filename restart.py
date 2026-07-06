@@ -15,6 +15,12 @@ from datetime import datetime
 TOKEN = os.getenv("TOKEN")
 COMMAND_STATE_FILE = "command_state.json"
 
+# ✅ Create the file if it doesn't exist
+if not os.path.exists(COMMAND_STATE_FILE):
+    with open(COMMAND_STATE_FILE, 'w') as f:
+        json.dump({}, f)
+    print("Created empty command_state.json")
+
 # ========== COMMAND STATE MANAGEMENT ==========
 def load_command_state():
     try:
