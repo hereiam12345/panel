@@ -99,22 +99,22 @@ class AutoRestartBot(commands.Bot):
                 msg += f"{cmd}: {json.dumps(data)[:100]}\n"
             await ctx.send(msg[:1900])
 
-async def on_ready(self):
-    print(f"Auto-Restart Monitor logged in as {self.user}")
-    
-    if not self.restored_commands:
-        state = load_command_state()
-        if state:
-            print(f"Restoring {len(state)} command(s)...")
-            await asyncio.sleep(3)
-            for cmd_name, data in state.items():
-                try:
-                    await self.restore_command(cmd_name, data)
-                except Exception as e:
-                    print(f"Failed to restore {cmd_name}: {e}")
-            self.restored_commands = True
-        else:
-            print("No saved commands to restore")
+    async def on_ready(self):
+        print(f"Auto-Restart Monitor logged in as {self.user}")
+        
+        if not self.restored_commands:
+            state = load_command_state()
+            if state:
+                print(f"Restoring {len(state)} command(s)...")
+                await asyncio.sleep(3)
+                for cmd_name, data in state.items():
+                    try:
+                        await self.restore_command(cmd_name, data)
+                    except Exception as e:
+                        print(f"Failed to restore {cmd_name}: {e}")
+                self.restored_commands = True
+            else:
+                print("No saved commands to restore")
 
     async def restore_ab(self, data):
         channel_id = data['channel_id']
@@ -558,43 +558,33 @@ async def on_ready(self):
         self.reaction_emojis = data.get('emojis', [])
         print(f"Restored react with {len(self.reaction_emojis)} emojis")
 
-async def restore_command(self, command_name, data):
-    restore_map = {
-        "ab": self.restore_ab,
-        "ablow": self.restore_ablow,
-        "spam": self.restore_spam,
-        "spamall": self.restore_spamall,
-        "aball": self.restore_aball,
-        "autopaste": self.restore_autopaste,
-        "stam": self.restore_stam,
-        "autocount": self.restore_autocount,
-        "stream": self.restore_stream,
-        "gcname": self.restore_gcname,
-        "multireact": self.restore_multireact,
-        "multistam": self.restore_multistam,
-        "multicount": self.restore_multicount,
-        "multistream": self.restore_multistream,
-        "react": self.restore_react
-    }
-    
-    if command_name in restore_map:
-        try:
-            await restore_map[command_name](data)
-        except Exception as e:
-            print(f"Error restoring {command_name}: {e}")
-    else:
-        print(f"Unknown command: {command_name}")
+    async def restore_command(self, command_name, data):
+        restore_map = {
+            "ab": self.restore_ab,
+            "ablow": self.restore_ablow,
+            "spam": self.restore_spam,
+            "spamall": self.restore_spamall,
+            "aball": self.restore_aball,
+            "autopaste": self.restore_autopaste,
+            "stam": self.restore_stam,
+            "autocount": self.restore_autocount,
+            "stream": self.restore_stream,
+            "gcname": self.restore_gcname,
+            "multireact": self.restore_multireact,
+            "multistam": self.restore_multistam,
+            "multicount": self.restore_multicount,
+            "multistream": self.restore_multistream,
+            "react": self.restore_react
+        }
         
-        if not self.restored_commands:
-            state = load_command_state()
-            if state:
-                print(f"Restoring {len(state)} command(s)...")
-                await asyncio.sleep(3)
-                for cmd_name, data in state.items():
-                    await self.restore_command(cmd_name, data)
-                self.restored_commands = True
-            else:
-                print("No saved commands to restore")
+        if command_name in restore_map:
+            try:
+                await restore_map[command_name](data)
+            except Exception as e:
+                print(f"Error restoring {command_name}: {e}")
+        else:
+            print(f"Unknown command: {command_name}")
+            
 
 # ========== RUN ==========
 if __name__ == "__main__":
