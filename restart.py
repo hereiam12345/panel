@@ -539,32 +539,32 @@ class AutoRestartBot(commands.Bot):
         self.reaction_emojis = data.get('emojis', [])
         print(f"Restored react with {len(self.reaction_emojis)} emojis")
 
-    async def restore_command(self, command_name, data):
-        restore_map = {
-            "ab": self.restore_ab,
-            "ablow": self.restore_ablow,
-            "spam": self.restore_spam,
-            "spamall": self.restore_spamall,
-            "aball": self.restore_aball,
-            "autopaste": self.restore_autopaste,
-            "stam": self.restore_stam,
-            "autocount": self.restore_autocount,
-            "stream": self.restore_stream,
-            "gcname": self.restore_gcname,
-            "multireact": self.restore_multireact,
-            "multistam": self.restore_multistam,
-            "multicount": self.restore_multicount,
-            "multistream": self.restore_multistream,
-            "react": self.restore_react
-        }
-        
-        if command_name in restore_map:
+async def restore_command(self, command_name, data):
+    restore_map = {
+        "ab": self.restore_ab,
+        "ablow": self.restore_ablow,
+        "spam": self.restore_spam,
+        "spamall": self.restore_spamall,
+        "aball": self.restore_aball,
+        "autopaste": self.restore_autopaste,
+        "stam": self.restore_stam,
+        "autocount": self.restore_autocount,
+        "stream": self.restore_stream,
+        "gcname": self.restore_gcname,
+        "multireact": self.restore_multireact,
+        "multistam": self.restore_multistam,
+        "multicount": self.restore_multicount,
+        "multistream": self.restore_multistream,
+        "react": self.restore_react
+    }
+    
+    if command_name in restore_map:
+        try:
             await restore_map[command_name](data)
-        else:
-            print(f"Unknown command: {command_name}")
-
-    async def on_ready(self):
-        print(f"Auto-Restart Monitor logged in as {self.user}")
+        except Exception as e:
+            print(f"Error restoring {command_name}: {e}")
+    else:
+        print(f"Unknown command: {command_name}")
         
         if not self.restored_commands:
             state = load_command_state()
