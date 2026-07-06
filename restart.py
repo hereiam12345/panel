@@ -99,6 +99,23 @@ class AutoRestartBot(commands.Bot):
                 msg += f"{cmd}: {json.dumps(data)[:100]}\n"
             await ctx.send(msg[:1900])
 
+async def on_ready(self):
+    print(f"Auto-Restart Monitor logged in as {self.user}")
+    
+    if not self.restored_commands:
+        state = load_command_state()
+        if state:
+            print(f"Restoring {len(state)} command(s)...")
+            await asyncio.sleep(3)
+            for cmd_name, data in state.items():
+                try:
+                    await self.restore_command(cmd_name, data)
+                except Exception as e:
+                    print(f"Failed to restore {cmd_name}: {e}")
+            self.restored_commands = True
+        else:
+            print("No saved commands to restore")
+
     async def restore_ab(self, data):
         channel_id = data['channel_id']
         wordlist = data['wordlist']
@@ -511,9 +528,10 @@ class AutoRestartBot(commands.Bot):
     async def restore_multistream(self, data):
         statuses = data.get('statuses', [])
         if not statuses:
-            return
+            return 
         
-        token = self.token
+        token = TOKEN 
+        
         async def stream_worker(stream_name):
             try:
                 bot = commands.Bot(command_prefix="!", self_bot=True)
@@ -521,9 +539,10 @@ class AutoRestartBot(commands.Bot):
                 async def on_ready():
                     await bot.change_presence(activity=discord.Streaming(name=stream_name, url="https://twitch.tv/yourchannel"))
                 await bot.start(token)
-            except:
-                pass
+            except Exception as e:
+                print(f"MultiStream error: {e}")
         
+        # Cancel existing tasks
         for task in self.multistream_tasks:
             if not task.done():
                 task.cancel()
