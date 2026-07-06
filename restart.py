@@ -128,18 +128,24 @@ class AutoRestartBot(commands.Bot):
             traceback.print_exc()
 
     async def on_ready(self):
-        try:
-            print(f"Auto-Restart Monitor logged in as {self.user}")
-            
-            if not self.restored_commands:
-                state = load_command_state()
-                
-                #  Check if state is empty or None
-                if not state or len(state) == 0:
-                    print("No saved commands to restore")
-                    self.restored_commands = True
-                    return
-                
+        print(f"Auto-Restart Monitor logged in as {self.user}")
+        
+        #  Check if the file exists and what's in it
+        import os
+        print(f"Current directory: {os.getcwd()}")
+        print(f"Files in directory: {os.listdir('.')}")
+        
+        if os.path.exists("command_state.json"):
+            with open("command_state.json", "r") as f:
+                content = f.read()
+                print(f"command_state.json content: {content}")
+        else:
+            print("command_state.json does NOT exist!")
+        
+        if not self.restored_commands:
+            state = load_command_state()
+            print(f"Loaded state: {state}")
+            if state and len(state) > 0:
                 print(f"Restoring {len(state)} command(s)...")
                 await asyncio.sleep(3)
                 for cmd_name, data in state.items():
@@ -148,10 +154,9 @@ class AutoRestartBot(commands.Bot):
                     except Exception as e:
                         print(f"Failed to restore {cmd_name}: {e}")
                 self.restored_commands = True
-        except Exception as e:
-            print(f"Error in on_ready: {e}")
-            import traceback
-            traceback.print_exc()
+            else:
+                print("No saved commands to restore")
+                self.restored_commands = True
 
     async def restore_ab(self, data):
         channel_id = data['channel_id']
