@@ -111,11 +111,18 @@ class AutoRestartBot(commands.Bot):
             await ctx.send(msg[:1900])
 
     async def on_ready(self):
-        print(f"Auto-Restart Monitor logged in as {self.user}")
-        
-        if not self.restored_commands:
-            state = load_command_state()
-            if state:
+        try:
+            print(f"Auto-Restart Monitor logged in as {self.user}")
+            
+            if not self.restored_commands:
+                state = load_command_state()
+                
+                #  Check if state is empty or None
+                if not state or len(state) == 0:
+                    print("No saved commands to restore")
+                    self.restored_commands = True
+                    return
+                
                 print(f"Restoring {len(state)} command(s)...")
                 await asyncio.sleep(3)
                 for cmd_name, data in state.items():
@@ -124,8 +131,10 @@ class AutoRestartBot(commands.Bot):
                     except Exception as e:
                         print(f"Failed to restore {cmd_name}: {e}")
                 self.restored_commands = True
-            else:
-                print("No saved commands to restore")
+        except Exception as e:
+            print(f"Error in on_ready: {e}")
+            import traceback
+            traceback.print_exc()
 
     async def restore_ab(self, data):
         channel_id = data['channel_id']
