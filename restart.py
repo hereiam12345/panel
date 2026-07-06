@@ -89,10 +89,15 @@ class AutoRestartBot(commands.Bot):
             import traceback
             traceback.print_exc()
         
-    def _register_commands(self):
-        try:
-            @self.command(name='savecommand')
-            async def save_cmd(ctx, name: str, *, data: str):
+     def _register_commands(self):
+        # Remove existing commands if they exist
+        for cmd_name in ['savecommand', 'removecommand', 'listcommands']:
+            existing = self.get_command(cmd_name)
+            if existing:
+                self.remove_command(cmd_name)
+                
+                @self.command(name='savecommand')
+                async def save_cmd(ctx, name: str, *, data: str):
                 try:
                     data_json = json.loads(data)
                     add_command_state(name, data_json)
