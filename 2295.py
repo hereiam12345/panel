@@ -265,6 +265,14 @@ class SupremeBot(commands.Bot):
             print(f" Logged in as: {self.user} (ID: {self.user.id})")
             print(f" Prefix: {self.command_prefix}")
             print("Type .menu to see all commands")
+            #  Check if there are saved commands to restore
+            state = load_command_state()
+            if state:
+                print(f"Found {len(state)} saved command(s)")
+                for cmd_name, data in state.items():
+                    print(f"  - {cmd_name}: {data}")
+            else:
+                print("No saved commands found")
         
         @self.event
         async def on_message(message):
