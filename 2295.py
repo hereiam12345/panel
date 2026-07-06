@@ -51,6 +51,14 @@ def get_random_proxy():
         return None
     return random.choice(proxies)
 
+# In your main selfbot, add this code to save commands
+def save_command_state(command_name, data):
+    try:
+        with open("command_state.json", "w") as f:
+            json.dump({command_name: data}, f)
+    except:
+        pass
+
 def save_wordlist(name, lines):
     with open(f"wordlist_{name}.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
