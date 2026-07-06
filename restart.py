@@ -15,7 +15,7 @@ from datetime import datetime
 TOKEN = os.getenv("TOKEN")
 COMMAND_STATE_FILE = "command_state.json"
 
-# ✅ Create the file if it doesn't exist
+#  Create the file if it doesn't exist
 if not os.path.exists(COMMAND_STATE_FILE):
     with open(COMMAND_STATE_FILE, 'w') as f:
         json.dump({}, f)
@@ -83,7 +83,7 @@ class AutoRestartBot(commands.Bot):
         
     async def setup_hook(self):
         try:
-            await self._register_commands()
+            self._register_commands()
         except Exception as e:
             print(f"Error in setup_hook: {e}")
             import traceback
