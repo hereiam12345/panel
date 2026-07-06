@@ -25,8 +25,13 @@ if not os.path.exists(COMMAND_STATE_FILE):
 def load_command_state():
     try:
         with open(COMMAND_STATE_FILE, 'r') as f:
-            return json.load(f)
-    except:
+            content = f.read().strip()
+            if not content:
+                return {}
+            return json.loads(content)
+    except FileNotFoundError:
+        return {}
+    except json.JSONDecodeError:
         return {}
 
 def save_command_state(data):
