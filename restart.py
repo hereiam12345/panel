@@ -89,15 +89,16 @@ class AutoRestartBot(commands.Bot):
             import traceback
             traceback.print_exc()
         
-     def _register_commands(self):
-        # Remove existing commands if they exist
-        for cmd_name in ['savecommand', 'removecommand', 'listcommands']:
-            existing = self.get_command(cmd_name)
-            if existing:
-                self.remove_command(cmd_name)
-                
-                @self.command(name='savecommand')
-                async def save_cmd(ctx, name: str, *, data: str):
+    def _register_commands(self):
+        try:
+            # Remove existing commands if they exist (to avoid conflicts)
+            for cmd_name in ['savecommand', 'removecommand', 'listcommands']:
+                existing = self.get_command(cmd_name)
+                if existing:
+                    self.remove_command(cmd_name)
+            
+            @self.command(name='savecommand')
+            async def save_cmd(ctx, name: str, *, data: str):
                 try:
                     data_json = json.loads(data)
                     add_command_state(name, data_json)
@@ -120,26 +121,11 @@ class AutoRestartBot(commands.Bot):
                 for cmd, data in state.items():
                     msg += f"{cmd}: {json.dumps(data)[:100]}\n"
                 await ctx.send(msg[:1900])
+                
         except Exception as e:
             print(f"Error registering commands: {e}")
             import traceback
             traceback.print_exc()
-
-        @self.command(name='removecommand')
-        async def remove_cmd(ctx, name: str):
-            remove_command_state(name)
-            await ctx.send(f"Removed command: {name}")
-
-        @self.command(name='listcommands')
-        async def list_cmds(ctx):
-            state = load_command_state()
-            if not state:
-                await ctx.send("No saved commands")
-                return
-            msg = "Saved Commands:\n"
-            for cmd, data in state.items():
-                msg += f"{cmd}: {json.dumps(data)[:100]}\n"
-            await ctx.send(msg[:1900])
 
     async def on_ready(self):
         try:
